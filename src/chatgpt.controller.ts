@@ -37,7 +37,6 @@ export class OpenAIController {
   @Get('messages/:documentId')
   async listMessages(@Param('documentId') documentId: string) {
     try{
-      console.log(documentId)
       if (!documentId) {
         return { error: 'User ID is required' };
       }

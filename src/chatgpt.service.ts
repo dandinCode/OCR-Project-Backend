@@ -16,6 +16,7 @@ export class OpenAIService {
         model: "gpt-4o-mini",
         top_p: 0.1,
         temperature: 0.2,
+        max_tokens: 150,
       });
 
       return completion.choices[0].message.content;

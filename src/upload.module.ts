@@ -5,6 +5,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { PrismaService } from './database/prisma.service';
 import { DocumentRepository } from './repositories/document-repository';
 import { PrismaDocumentRepository } from './repositories/prisma/prisma-document-repository';
+import { MessageRepository } from './repositories/message-repository';
+import { PrismaMessageRepository } from './repositories/prisma/prisma-message-repository';
 
 @Module({
   imports: [
@@ -16,6 +18,9 @@ import { PrismaDocumentRepository } from './repositories/prisma/prisma-document-
   providers: [OcrService, PrismaService, {
     provide: DocumentRepository,
     useClass: PrismaDocumentRepository,
+  }, {
+    provide: MessageRepository,
+    useClass: PrismaMessageRepository,
   }],
 })
 export class UploadModule {}

@@ -1,14 +1,18 @@
-import { Controller, Post, Get, Query, Param, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
+import { Controller, Post, Get, Query, Param, UseInterceptors, UploadedFile, Body, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { OcrService } from './ocr.service';
 import { DocumentRepository } from './repositories/document-repository';
-import { request } from 'http';
+const PDFDocument = require('pdfkit');
+import { Response } from 'express';
+import { MessageRepository } from './repositories/message-repository';
+const fs = require('fs');
 
 @Controller('upload')
 export class UploadController {
     constructor(
         private readonly ocrService: OcrService, 
-        private documentRepository : DocumentRepository
+        private documentRepository : DocumentRepository,
+        private messageRepository : MessageRepository
     ) {}
 
     @Post('image')
@@ -59,4 +63,43 @@ export class UploadController {
         }
         
     }
+
+    @Get('download/:documentId')
+    async downloadDocument(@Param('documentId') documentId: string, @Res() res: Response) {
+        const document = await this.documentRepository.findById(documentId);
+        if (!document) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+    
+        const doc = new PDFDocument();
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="document.pdf"`,
+        );
+        res.setHeader('Content-Type', 'application/pdf');
+    
+        doc.pipe(res);
+
+        doc.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
+        doc.moveDown(25);
+
+        doc.fontSize(16).text('Dados Extraídos:', { underline: true });
+        doc.fontSize(14).text(document.extractedText);
+    
+        doc.moveDown();
+        doc.fontSize(16).text('Interações com o LLM:', { lineGap: 4, underline: true });
+    
+        const messages = await this.messageRepository.findAllByDocumentId(documentId);
+        messages.forEach((msg) => {
+            if (msg.owner === "user") {
+                doc.font('Helvetica-Bold').fontSize(14).text('Usuário: ', { continued: true });
+                doc.font('Helvetica').text(msg.text);
+            } else {
+                doc.font('Helvetica-Bold').fontSize(14).text('Resposta: ', { continued: true })
+                doc.font('Helvetica').text(msg.text);
+            }
+        });
+    
+        doc.end();
+    }    
 }

@@ -1,8 +1,8 @@
 import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
-import { UserRepository } from './repositories/user-repository';
-import { CreateUserBody } from './dtos/create-user-body';
+import { UserRepository } from '../repositories/user-repository';
+import { CreateUserBody } from '../dtos/create-user-body';
 import * as bcrypt from 'bcrypt';
-import { AuthService } from './auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 
 @Controller('app')

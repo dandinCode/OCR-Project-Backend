@@ -79,9 +79,11 @@ export class UploadController {
         res.setHeader('Content-Type', 'application/pdf');
     
         doc.pipe(res);
-
-        doc.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
-        doc.moveDown(25);
+        
+        if (fs.existsSync(document.filePath)){
+            doc.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
+            doc.moveDown(25);
+        }
 
         doc.fontSize(16).text('Dados Extraídos:', { underline: true });
         doc.fontSize(14).text(document.extractedText);

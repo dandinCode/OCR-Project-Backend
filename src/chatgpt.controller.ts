@@ -6,7 +6,7 @@ import { MessageRepository } from './repositories/message-repository';
 @Controller('openai')
 export class OpenAIController {
   constructor(private readonly openAIService: OpenAIService, private messageRepository: MessageRepository) {}
-
+ 
   @Post('chat')
   async chat(@Body() body: { prompt: string, document: Document }) {
     try{
@@ -56,20 +56,3 @@ interface Document {
   extractedText: string;
   name: string;
 }
-
-/*
- @Get('messages/:id')
-  async listMessages(@Param('documentId') documentId: string) {
-    try{
-      console.log(documentId)
-      if (!documentId) {
-        return { error: 'User ID is required' };
-      }
-      const messages = await this.messageRepository.findAllByDocumentId(documentId);
-      return messages;
-    } catch (error) {
-      console.error('Error fetching document:', error);
-      return { success: false, error: error.message };
-    }
-  }
-*/

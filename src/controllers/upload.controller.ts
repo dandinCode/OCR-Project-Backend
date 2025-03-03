@@ -1,10 +1,10 @@
 import { Controller, Post, Get, Query, Param, UseInterceptors, UploadedFile, Body, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { OcrService } from './ocr.service';
-import { DocumentRepository } from './repositories/document-repository';
+import { OcrService } from '../services/ocr.service';
+import { DocumentRepository } from '../repositories/document-repository';
 const PDFDocument = require('pdfkit');
 import { Response } from 'express';
-import { MessageRepository } from './repositories/message-repository';
+import { MessageRepository } from '../repositories/message-repository';
 const fs = require('fs');
 
 @Controller('upload')

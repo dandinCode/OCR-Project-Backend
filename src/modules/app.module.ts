@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { PrismaService } from './database/prisma.service';
+import { AppController } from '../controllers/app.controller';
+import { PrismaService } from '../database/prisma.service';
 import { UploadModule } from './upload.module';
 import { ChatGptModule } from './chatgpt.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserRepository } from './repositories/user-repository';
-import { PrismaUserRepository } from './repositories/prisma/prisma-user-repository';
-import { AuthService } from './auth/auth.service';
-import { AuthModule } from './auth/auth.module';
+import { UserRepository } from '../repositories/user-repository';
+import { PrismaUserRepository } from '../repositories/prisma/prisma-user-repository';
+import { AuthService } from '../auth/auth.service';
+import { AuthModule } from '../auth/auth.module';
 
 
 @Module({

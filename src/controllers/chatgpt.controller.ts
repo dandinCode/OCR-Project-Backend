@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { OpenAIService } from './chatgpt.service';
-import { MessageRepository } from './repositories/message-repository';
+import { OpenAIService } from '../services/chatgpt.service';
+import { MessageRepository } from '../repositories/message-repository';
 
 
 @Controller('openai')

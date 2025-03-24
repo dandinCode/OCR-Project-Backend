@@ -20,12 +20,10 @@ export class SeedService {
     ];
   
     for (const plan of plans) {
-      // Verifica se o plano já existe no banco de dados
       const existingPlan = await this.plansRepository.findByName(plan.name);
   
       if (!existingPlan) {
-        // Se o plano não existir, cria um novo
-        await this.plansRepository.create(plan.name, plan.tokens, plan.price);  // Passa o objeto diretamente
+        await this.plansRepository.create(plan.name, plan.tokens, plan.price);  
         console.log(`Plano "${plan.name}" criado com sucesso.`);
       } else {
         console.log(`Plano "${plan.name}" já existe.`);

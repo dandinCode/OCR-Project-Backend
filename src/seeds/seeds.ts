@@ -1,6 +1,6 @@
 import { PrismaService } from '../database/prisma.service';
 import { PrismaPlansRepository } from '../repositories/prisma/prisma-plans-repository';
-import { SeedService } from './seed.service';
+import { SeedService } from '@/services/seed.service';
 
 async function runSeed() {
     // Criar instâncias manualmente

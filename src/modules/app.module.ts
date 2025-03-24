@@ -8,8 +8,6 @@ import { UserRepository } from '../repositories/user-repository';
 import { PrismaUserRepository } from '../repositories/prisma/prisma-user-repository';
 import { AuthService } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
-import { PlansRepository } from '../repositories/plans-repository';
-import { PrismaPlansRepository } from '../repositories/prisma/prisma-plans-repository';
 
 @Module({
   imports: [
@@ -20,16 +18,9 @@ import { PrismaPlansRepository } from '../repositories/prisma/prisma-plans-repos
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    PrismaService,
-    {
-      provide: UserRepository,
-      useClass: PrismaUserRepository,
-    },
-    {
-      provide: PlansRepository,
-      useClass: PrismaPlansRepository,
-    }
-  ],
+  providers: [PrismaService, {
+    provide: UserRepository,
+    useClass: PrismaUserRepository,
+  }],
 })
 export class AppModule {}

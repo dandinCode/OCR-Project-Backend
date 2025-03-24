@@ -8,19 +8,28 @@ import { UserRepository } from '../repositories/user-repository';
 import { PrismaUserRepository } from '../repositories/prisma/prisma-user-repository';
 import { AuthService } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
-
+import { PlansRepository } from '../repositories/plans-repository';
+import { PrismaPlansRepository } from '../repositories/prisma/prisma-plans-repository';
 
 @Module({
-  imports: [AuthModule, UploadModule, ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+  imports: [
+    AuthModule, 
+    UploadModule, 
+    ConfigModule.forRoot({ isGlobal: true }),
     ChatGptModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [PrismaService, {
-    provide: UserRepository,
-    useClass: PrismaUserRepository,
-  }],
+  providers: [
+    PrismaService,
+    {
+      provide: UserRepository,
+      useClass: PrismaUserRepository,
+    },
+    {
+      provide: PlansRepository,
+      useClass: PrismaPlansRepository,
+    }
+  ],
 })
 export class AppModule {}

@@ -11,10 +11,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String  
-  documents Document[]
+  id              String      @id @default(cuid())
+  email           String      @unique
+  password        String  
+  documents       Document[]
+  maxTokens       Int         @default(10000)
+  planExpiration  DateTime?
+  chosenPlan      String      @default("Free")
 }
 
 model Document {
@@ -34,4 +37,11 @@ model Message {
   text        String
   owner       String
   createdAt   DateTime @default(now())
+}
+
+model Plans {
+  id        Int   @id  @default(autoincrement())
+  name      String  @unique
+  tokens    Int      
+  price     Decimal
 }

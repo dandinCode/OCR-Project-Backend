@@ -8,7 +8,10 @@ export class OpenAIService {
   private readonly apiKey = process.env.OPENAI_API_KEY;
  
 
-  async generateText(prompt: string, extractedText: string): Promise<string> {
+  async generateText(prompt: string, extractedText: string, maxTokens: number )
+  : Promise<
+    { response: string, totalTokensUsed: number}
+  > {
     try {
       const promptConcatened = extractedText + ' - ' + prompt;
       const completion = await this.openai.chat.completions.create({
@@ -16,10 +19,13 @@ export class OpenAIService {
         model: "gpt-4o-mini",
         top_p: 0.1,
         temperature: 0.2,
-        max_tokens: 150,
+        max_tokens: maxTokens,
       });
 
-      return completion.choices[0].message.content;
+      const responseText = completion.choices[0].message.content;
+      const totalTokensUsed = completion.usage.total_tokens;
+  
+      return { response: responseText, totalTokensUsed };
 
     } catch (error) {
       if (error.message.includes('exceeded your current quota')) {

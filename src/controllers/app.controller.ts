@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Param, Get } from '@nestjs/common';
 import { UserRepository } from '../repositories/user-repository';
 import { CreateUserBody } from '../dtos/create-user-body';
 import * as bcrypt from 'bcrypt';
@@ -31,4 +31,21 @@ export class AppController {
 
     return this.authService.login(user);
   }
+
+  @Get(":id")
+  async getUser(@Param('id') id: string){
+      try {
+      const user = await this.userRepository.findById(id);
+      console.log(user)
+
+      if (!user) {
+          return { success: false, error: "User not found" };
+      }
+
+      return user;
+  } catch (error) {
+      console.error('Error fetching user:', error);
+      return { success: false, error: error.message };
+  }
+}
 }

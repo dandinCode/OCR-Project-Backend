@@ -8,6 +8,7 @@ import { UserRepository } from '../repositories/user-repository';
 import { PrismaUserRepository } from '../repositories/prisma/prisma-user-repository';
 import { AuthService } from '../auth/auth.service';
 import { AuthModule } from '../auth/auth.module';
+import { PlansModule } from './plans.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from '../auth/auth.module';
     ConfigModule.forRoot({ isGlobal: true }),
     ChatGptModule,
     AuthModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [PrismaService, {

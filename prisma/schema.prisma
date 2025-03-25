@@ -17,7 +17,7 @@ model User {
   documents       Document[]
   maxTokens       Int         @default(10000)
   planExpiration  DateTime?
-  chosenPlan      String      @default("Free")
+  chosenPlan      String      @default("Gratuito")
 }
 
 model Document {
@@ -40,8 +40,9 @@ model Message {
 }
 
 model Plans {
-  id        Int   @id  @default(autoincrement())
-  name      String  @unique
-  tokens    Int      
-  price     Decimal
+  id          Int   @id  @default(autoincrement())
+  name        String  @unique
+  tokens      Int      
+  price       Decimal
+  themeColor  String?
 }

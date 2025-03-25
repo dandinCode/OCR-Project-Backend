@@ -12,18 +12,18 @@ export class SeedService {
 
     async seedPlans() {
     const plans = [
-      { name: 'Free', tokens: 10000, price: new Decimal(0) },
-      { name: 'Prepaid', tokens: 200000, price: new Decimal(9.90) },
-      { name: 'Bronze Plan', tokens: 500000, price: new Decimal(14.90) },
-      { name: 'Silver Plan', tokens: 3000000, price: new Decimal(29.90) },
-      { name: 'Gold Plan', tokens: 10000000, price: new Decimal(99.90) },
+      { name: 'Gratuito', tokens: 10000, price: new Decimal(0), themeColor: "stone" },
+      { name: 'Pré-pago', tokens: 200000, price: new Decimal(9.90), themeColor: "slate" },
+      { name: 'Bronze', tokens: 500000, price: new Decimal(14.90), themeColor: "amber" },
+      { name: 'Prata', tokens: 3000000, price: new Decimal(29.90), themeColor: "gray" },
+      { name: 'Ouro', tokens: 10000000, price: new Decimal(99.90), themeColor: "yellow" },
     ];
   
     for (const plan of plans) {
       const existingPlan = await this.plansRepository.findByName(plan.name);
   
       if (!existingPlan) {
-        await this.plansRepository.create(plan.name, plan.tokens, plan.price);  
+        await this.plansRepository.create(plan.name, plan.tokens, plan.price, plan.themeColor);  
         console.log(`Plano "${plan.name}" criado com sucesso.`);
       } else {
         console.log(`Plano "${plan.name}" já existe.`);

@@ -1,3 +1,4 @@
+import { UserRepository } from '@/repositories/user-repository';
 import { Injectable } from '@nestjs/common';
 import { Stripe } from 'stripe';
 
@@ -5,7 +6,7 @@ import { Stripe } from 'stripe';
 export class StripeService {
   private stripe: Stripe;
 
-  constructor() {
+  constructor(private userRepository: UserRepository) {
     this.stripe = new Stripe( process.env.STRIPE_SECRET_KEY, {
       apiVersion: "2025-02-24.acacia", 
     });
@@ -29,6 +30,14 @@ export class StripeService {
       if (!session) {
         throw new Error("Sessão de pagamento não encontrada");
       }
+      if(!session.client_reference_id || !session.metadata?.tokens || !session.metadata?.productName) {
+        throw new Error("Dados não encontrados");
+      }
+
+      const planExpiration = new Date();0
+      planExpiration.setMonth(planExpiration.getMonth() + 1);
+
+      await this.userRepository.updateUserPlan(session.client_reference_id, Number(session.metadata?.tokens),  planExpiration, session.metadata?.productName)
 
       return {
         userId: session.client_reference_id,
@@ -39,4 +48,5 @@ export class StripeService {
       throw new Error("Erro ao verificar pagamento: " + error.message);
     }
   }
+
 }

@@ -41,4 +41,13 @@ export class PrismaUserRepository implements UserRepository {
       });
       return user;
     }
-}
+
+    async updateUserPlan(id: string, maxTokens: number, planExpiration: Date, chosenPlan: string): Promise<{ id: string } | null> {
+      const user = await this.prisma.user.update({
+        where: { id }, 
+        data: { maxTokens, planExpiration, chosenPlan },  
+        select: { id: true },  
+      });
+      return user;
+    }
+  }

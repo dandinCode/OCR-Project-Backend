@@ -4,4 +4,6 @@ export abstract class UserRepository {
     abstract findById(id: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string} | null>;
 
     abstract updateMaxTokens(id: string, maxTokens: number): Promise<{ id: string } | null>;
+
+    abstract updateUserPlan(id: string, maxTokens: number, planExpiration: Date, chosenPlan: string): Promise<{ id: string } | null>;
   }

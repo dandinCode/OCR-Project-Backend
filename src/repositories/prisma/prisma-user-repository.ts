@@ -20,11 +20,18 @@ export class PrismaUserRepository implements UserRepository {
         return user;
       }
 
-    async findById(id: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string} | null> {
-      return this.prisma.user.findUnique({
-        where: { id },
-      });
-    }
+      async findById(id: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string } | null> {
+        return this.prisma.user.findUnique({
+          where: { id },
+          select: {  // 🔹 Especifica quais campos devem ser retornados
+            id: true,
+            email: true,
+            maxTokens: true,
+            planExpiration: true,
+            chosenPlan: true
+          },
+        });
+      }
 
     async updateMaxTokens(id: string, maxTokens: number): Promise<{ id: string } | null> {
       const user = await this.prisma.user.update({

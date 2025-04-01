@@ -36,16 +36,15 @@ export class AppController {
   async getUser(@Param('id') id: string){
       try {
       const user = await this.userRepository.findById(id);
-      console.log(user)
 
       if (!user) {
           return { success: false, error: "User not found" };
       }
 
       return user;
-  } catch (error) {
-      console.error('Error fetching user:', error);
-      return { success: false, error: error.message };
+      } catch (error) {
+          console.error('Error fetching user:', error);
+          return { success: false, error: error.message };
+      }
   }
-}
 }

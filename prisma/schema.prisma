@@ -11,13 +11,14 @@ datasource db {
 }
 
 model User {
-  id              String      @id @default(cuid())
-  email           String      @unique
-  password        String  
-  documents       Document[]
-  maxTokens       Int         @default(10000)
-  planExpiration  DateTime?
-  chosenPlan      String      @default("Gratuito")
+  id                String      @id @default(cuid())
+  email             String      @unique
+  password          String  
+  documents         Document[]
+  maxTokens         Int         @default(10000)
+  planExpiration    DateTime?
+  chosenPlan        String      @default("Gratuito")
+  stripeCustomerId  String?     @unique
 }
 
 model Document {

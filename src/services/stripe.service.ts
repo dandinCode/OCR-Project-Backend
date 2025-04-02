@@ -30,14 +30,15 @@ export class StripeService {
       if (!session) {
         throw new Error("Sessão de pagamento não encontrada");
       }
-      if(!session.client_reference_id || !session.metadata?.tokens || !session.metadata?.productName) {
+      
+      if(!session.client_reference_id || !session.metadata?.tokens || !session.metadata?.productName || !session.customer) {
         throw new Error("Dados não encontrados");
       }
 
-      const planExpiration = new Date();0
+      const planExpiration = new Date();
       planExpiration.setMonth(planExpiration.getMonth() + 1);
 
-      await this.userRepository.updateUserPlan(session.client_reference_id, Number(session.metadata?.tokens),  planExpiration, session.metadata?.productName)
+      await this.userRepository.updateUserPlan(session.client_reference_id, Number(session.metadata?.tokens),  planExpiration, session.metadata?.productName, String(session.customer))
 
       return {
         userId: session.client_reference_id,

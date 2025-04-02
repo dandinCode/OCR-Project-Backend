@@ -15,7 +15,7 @@ export class OpenAIController {
 
       const user = await this.userRepository.findById(document.userId);
 
-      const { response, totalTokensUsed } = await this.openAIService.generateText(prompt, document.extractedText, user.maxTokens);
+      const { response, totalTokensUsed } = await this.openAIService.generateText(prompt, document.extractedText, user.maxTokens<5000?user.maxTokens:5000);
 
       await this.userRepository.updateMaxTokens(document.userId, (user.maxTokens - totalTokensUsed));
   

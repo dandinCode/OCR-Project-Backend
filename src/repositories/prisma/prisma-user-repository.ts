@@ -20,15 +20,16 @@ export class PrismaUserRepository implements UserRepository {
         return user;
       }
 
-      async findById(id: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string } | null> {
+      async findById(id: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string; stripeCustomerId: string } | null> {
         return this.prisma.user.findUnique({
           where: { id },
-          select: {  // 🔹 Especifica quais campos devem ser retornados
+          select: {  
             id: true,
             email: true,
             maxTokens: true,
             planExpiration: true,
-            chosenPlan: true
+            chosenPlan: true,
+            stripeCustomerId: true,
           },
         });
       }
@@ -42,12 +43,26 @@ export class PrismaUserRepository implements UserRepository {
       return user;
     }
 
-    async updateUserPlan(id: string, maxTokens: number, planExpiration: Date, chosenPlan: string): Promise<{ id: string } | null> {
+    async updateUserPlan(id: string, maxTokens: number, planExpiration: Date, chosenPlan: string, stripeCustomerId: string): Promise<{ id: string } | null> {
       const user = await this.prisma.user.update({
         where: { id }, 
-        data: { maxTokens, planExpiration, chosenPlan },  
+        data: { maxTokens, planExpiration, chosenPlan, stripeCustomerId },  
         select: { id: true },  
       });
       return user;
+    }
+
+    async findByStripeCustomerId(stripeCustomerId: string): Promise<{ id: string; email: string; maxTokens: number; planExpiration: Date; chosenPlan: string; stripeCustomerId: string } | null> {
+      return this.prisma.user.findUnique({
+        where: { stripeCustomerId },
+        select: {  
+          id: true,
+          email: true,
+          maxTokens: true,
+          planExpiration: true,
+          chosenPlan: true,
+          stripeCustomerId: true,
+        },
+      });
     }
   }

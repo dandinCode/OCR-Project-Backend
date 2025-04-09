@@ -1,18 +1,23 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { OpenAIService } from '../services/chatgpt.service';
 import { MessageRepository } from '../repositories/message-repository';
+import { UserRepository } from '../repositories/user-repository';
 
 
 @Controller('openai')
 export class OpenAIController {
-  constructor(private readonly openAIService: OpenAIService, private messageRepository: MessageRepository) {}
+  constructor(private readonly openAIService: OpenAIService, private messageRepository: MessageRepository,  private userRepository: UserRepository) {}
  
   @Post('chat')
   async chat(@Body() body: { prompt: string, document: Document }) {
     try{
       const { prompt, document } = body;
 
-      const response = await this.openAIService.generateText(prompt, document.extractedText);
+      const user = await this.userRepository.findById(document.userId);
+
+      const { response, totalTokensUsed } = await this.openAIService.generateText(prompt, document.extractedText, user.maxTokens<5000?user.maxTokens:5000);
+
+      await this.userRepository.updateMaxTokens(document.userId, (user.maxTokens - totalTokensUsed));
   
       await this.messageRepository.create(document.userId, document.id, prompt, "user");
       await this.messageRepository.create(document.userId, document.id, response, "chatgpt");

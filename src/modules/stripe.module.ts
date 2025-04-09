@@ -6,6 +6,8 @@ import { StripeController } from '@/controllers/stripe.controller';
 import { UserRepository } from '@/repositories/user-repository';
 import { PrismaUserRepository } from '@/repositories/prisma/prisma-user-repository';
 import { PrismaService } from '../database/prisma.service';
+import { PlansRepository } from '@/repositories/plans-repository';
+import { PrismaPlansRepository } from '@/repositories/prisma/prisma-plans-repository';
 
 @Module({
   controllers: [StripeController, WebhookController],
@@ -15,7 +17,11 @@ import { PrismaService } from '../database/prisma.service';
     {
       provide: UserRepository,
       useClass: PrismaUserRepository,
-    }
+    },
+    {
+      provide: PlansRepository,
+      useClass: PrismaPlansRepository,
+    },
   ],
 })
 export class StripeModule {}

@@ -26,7 +26,6 @@ export class StripeService {
   async verifyPayment(sessionId: string) {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-
       if (!session) {
         throw new Error("Sessão de pagamento não encontrada");
       }
@@ -42,8 +41,7 @@ export class StripeService {
 
       return {
         userId: session.client_reference_id,
-        productName: session.metadata?.productName || "Desconhecido",
-        status: session.payment_status,
+        productName: session.metadata?.productName,
       };
     } catch (error) {
       throw new Error("Erro ao verificar pagamento: " + error.message);

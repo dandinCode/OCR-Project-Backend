@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Query, Param, UseInterceptors, UploadedFile, Body, Res } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Controller, Post, Get, Query, Param, UseInterceptors, Body, Res, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { OcrService } from '../services/ocr.service';
 import { DocumentRepository } from '../repositories/document-repository';
 const PDFDocument = require('pdfkit');
 import { Response } from 'express';
 import { MessageRepository } from '../repositories/message-repository';
+import { randomUUID } from 'node:crypto';
 const fs = require('fs');
 
 @Controller('upload')
@@ -16,20 +17,38 @@ export class UploadController {
     ) {}
 
     @Post('image')
-    @UseInterceptors(FileInterceptor('file'))
-    async handleFileUpload(@UploadedFile() file: Express.Multer.File, @Body() body: { userId: string }) {
-        const { userId } = body;
-        console.log("\n Arquivo recebido:", file); 
-        try {
-            const extractedText = await this.ocrService.extractText(file.path);
-
-            const document = await this.documentRepository.create(userId, file.path,  extractedText, file.originalname);
-
-            return { success: true, text: extractedText, documentId: document.id  };
-        } catch (error) {
-            console.error("Erro ao processar o arquivo:", error); 
-            return { success: false, error: error.message };
+    @UseInterceptors(FilesInterceptor('file')) // <- múltiplos arquivos agora
+    async handleFileUpload(
+      @UploadedFiles() files: Express.Multer.File[],
+      @Body() body: { userId: string }
+    ) {
+      const { userId } = body;
+      console.log('\nuserid recebido:')
+      console.log(userId)
+  
+      try {
+        const chatId = randomUUID();
+  
+        for (const file of files) {
+          console.log('\nArquivo recebido:', file);
+  
+          const extractedText = await this.ocrService.extractText(file.path);
+          await this.documentRepository.create(
+            userId,
+            file.path,
+            extractedText,
+            file.originalname,
+            chatId,
+          );
         }
+
+        const response = { "success": true, chatId};
+  
+        return response;
+      } catch (error) {
+        console.error("Erro ao processar o arquivo:", error); 
+        return { success: false, error: error.message };
+      }
     }
 
     @Get('image/:id')
@@ -48,15 +67,41 @@ export class UploadController {
         }
     }
 
+    @Get('byChatId/:chatId')
+    async getDocumentsByChatId(@Param('chatId') chatId: string) {
+        try{
+            if (!chatId) {
+                return { error: 'Chat ID is required' };
+            }
+            
+            const documents = await this.documentRepository.findAllByChatId(chatId);
+
+            return { "success": true, documents};
+        } catch (error) {
+            console.error('Error fetching document:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     @Get('list')
     async listDocuments(@Query('userId') userId: string) {
         try{
             if (!userId) {
-                return { error: 'User ID is required' };
+                throw new Error('User ID is required');
             }
     
             const documents = await this.documentRepository.findAllByUserId(userId);
-            return documents;
+            const uniqueDocumentsMap = new Map();
+
+            for (const doc of documents) {
+            if (!uniqueDocumentsMap.has(doc.chatId)) {
+                uniqueDocumentsMap.set(doc.chatId, doc);
+            }
+            }
+
+            const result = Array.from(uniqueDocumentsMap.values());
+
+            return { "success": true, result};
         } catch (error) {
             console.error('Error fetching document:', error);
             return { success: false, error: error.message };
@@ -64,44 +109,53 @@ export class UploadController {
         
     }
 
-    @Get('download/:documentId')
-    async downloadDocument(@Param('documentId') documentId: string, @Res() res: Response) {
-        const document = await this.documentRepository.findById(documentId);
-        if (!document) {
+    @Get('download/:chatId')
+    async downloadDocument(@Param('chatId') chatId: string, @Res() res: Response) {
+        const documents = await this.documentRepository.findAllByChatId(chatId);
+
+        if (!documents || documents.length === 0) {
             return res.status(404).json({ error: "Document not found" });
         }
-    
-        const doc = new PDFDocument();
-        res.setHeader(
-            'Content-Disposition',
-            `attachment; filename="document.pdf"`,
-        );
+
+        const pdf = new PDFDocument();
+
+        res.setHeader('Content-Disposition', `attachment; filename="document.pdf"`);
         res.setHeader('Content-Type', 'application/pdf');
-    
-        doc.pipe(res);
-        
-        if (fs.existsSync(document.filePath)){
-            doc.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
-            doc.moveDown(25);
+        pdf.pipe(res);
+
+        for (const document of documents) {
+            pdf.fontSize(16).text(`Imagem: ${document.name || 'Sem nome'}`);
+
+            if (fs.existsSync(document.filePath)) {
+            pdf.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
+            pdf.moveDown(15);
+            }
+
+            pdf.fontSize(14).text("Dados extraído:", { underline: true });
+            pdf.fontSize(9).text(document.extractedText || "Sem texto extraído.", {
+                width: 1500, // limite horizontal
+                ellipsis: true,
+              });
+            pdf.addPage();
         }
 
-        doc.fontSize(16).text('Dados Extraídos:', { underline: true });
-        doc.fontSize(14).text(document.extractedText);
-    
-        doc.moveDown();
-        doc.fontSize(16).text('Interações com o LLM:', { lineGap: 4, underline: true });
-    
-        const messages = await this.messageRepository.findAllByDocumentId(documentId);
+        pdf.fontSize(16).text('Interações com o LLM:', { underline: true });
+        pdf.moveDown();
+
+        const messages = await this.messageRepository.findAllByChatId(chatId);
+
         messages.forEach((msg) => {
             if (msg.owner === "user") {
-                doc.font('Helvetica-Bold').fontSize(14).text('Usuário: ', { continued: true });
-                doc.font('Helvetica').text(msg.text);
+            pdf.font('Helvetica-Bold').fontSize(14).text('Usuário: ', { continued: true });
+            pdf.font('Helvetica').text(msg.text);
             } else {
-                doc.font('Helvetica-Bold').fontSize(14).text('Resposta: ', { continued: true })
-                doc.font('Helvetica').text(msg.text);
+            pdf.font('Helvetica-Bold').fontSize(14).text('Resposta: ', { continued: true });
+            pdf.font('Helvetica').text(msg.text);
             }
+            pdf.moveDown();
         });
-    
-        doc.end();
-    }    
+
+        pdf.end();
+    }
+
 }

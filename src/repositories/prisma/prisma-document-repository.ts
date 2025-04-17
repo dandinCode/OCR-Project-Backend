@@ -10,23 +10,20 @@ export class PrismaDocumentRepository implements DocumentRepository {
       userId: string,
       filePath: string,
       extractedText: string,
-      name: string
-    ): Promise<{
-      id: string;
-      filePath: string;
-      extractedText: string;
-      name: string;
-    }> {
+      name: string,
+      chatId: string,
+    ) {
       const document = await this.prisma.document.create({
         data: {
           filePath,
           userId,
           extractedText,
-          name, 
+          name,
+          chatId,
         },
       });
     
-      return document; 
+      return document;
     }
 
     async findById(id: string): Promise<{ id: string; filePath: string; extractedText: string, name: string} | null> {
@@ -36,10 +33,18 @@ export class PrismaDocumentRepository implements DocumentRepository {
     }
 
     async findAllByUserId(userId: string): Promise<
-      { id: string; filePath: string; extractedText: string; name: string }[]
+      { id: string; filePath: string; extractedText: string; name: string; chatId: string }[]
     > {
       return this.prisma.document.findMany({
         where: { userId },
+      });
+    }
+
+    async findAllByChatId(chatId: string): Promise<
+      { id: string; filePath: string; extractedText: string; name: string }[]
+    > {
+      return this.prisma.document.findMany({
+        where: { chatId },
       });
     }
 

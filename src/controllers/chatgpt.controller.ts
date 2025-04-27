@@ -3,11 +3,18 @@ import { OpenAIService } from '../services/chatgpt.service';
 import { MessageRepository } from '../repositories/message-repository';
 import { UserRepository } from '../repositories/user-repository';
 import { DocumentRepository } from '@/repositories/document-repository';
+import { ChatRepository } from '@/repositories/chat-repository';
 
 
 @Controller('openai')
 export class OpenAIController {
-  constructor(private readonly openAIService: OpenAIService, private messageRepository: MessageRepository,  private userRepository: UserRepository,  private documentRepository: DocumentRepository) {}
+  constructor(
+    private readonly openAIService: OpenAIService, 
+    private messageRepository: MessageRepository,  
+    private userRepository: UserRepository,  
+    private documentRepository: DocumentRepository,
+    private chatRepository: ChatRepository
+  ) {}
  
   @Post('chat')
   async chat(@Body() body: { prompt: string, userId: string, chatId: string }) {
@@ -15,6 +22,8 @@ export class OpenAIController {
       const { prompt, userId, chatId } = body;
 
       const user = await this.userRepository.findById(userId);
+
+      await this.chatRepository.updateAccessed(chatId, )
 
       const documents = await this.documentRepository.findAllByChatId(chatId);
       const concatenatedText = documents

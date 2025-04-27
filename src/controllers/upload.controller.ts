@@ -6,6 +6,7 @@ const PDFDocument = require('pdfkit');
 import { Response } from 'express';
 import { MessageRepository } from '../repositories/message-repository';
 import { randomUUID } from 'node:crypto';
+import { ChatRepository } from '@/repositories/chat-repository';
 const fs = require('fs');
 
 @Controller('upload')
@@ -13,21 +14,20 @@ export class UploadController {
     constructor(
         private readonly ocrService: OcrService, 
         private documentRepository : DocumentRepository,
-        private messageRepository : MessageRepository
+        private messageRepository : MessageRepository,
+        private chatRepository: ChatRepository
     ) {}
 
     @Post('image')
-    @UseInterceptors(FilesInterceptor('file')) // <- múltiplos arquivos agora
+    @UseInterceptors(FilesInterceptor('file')) 
     async handleFileUpload(
       @UploadedFiles() files: Express.Multer.File[],
       @Body() body: { userId: string }
     ) {
       const { userId } = body;
-      console.log('\nuserid recebido:')
-      console.log(userId)
   
       try {
-        const chatId = randomUUID();
+        const chat = await this.chatRepository.create(files[0].originalname, userId);
   
         for (const file of files) {
           console.log('\nArquivo recebido:', file);
@@ -38,11 +38,11 @@ export class UploadController {
             file.path,
             extractedText,
             file.originalname,
-            chatId,
+            chat.id,
           );
         }
 
-        const response = { "success": true, chatId};
+        const response = { success: true, chatId: chat.id};
   
         return response;
       } catch (error) {

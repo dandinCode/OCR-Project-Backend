@@ -9,6 +9,7 @@ import { PrismaUserRepository } from '../repositories/prisma/prisma-user-reposit
 import { AuthModule } from '../auth/auth.module';
 import { PlansModule } from './plans.module';
 import { StripeModule } from './stripe.module';
+import { ChatModule } from './chat.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StripeModule } from './stripe.module';
     AuthModule,
     PlansModule,
     StripeModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [PrismaService, {

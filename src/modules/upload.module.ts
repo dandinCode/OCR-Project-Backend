@@ -7,6 +7,8 @@ import { DocumentRepository } from '../repositories/document-repository';
 import { PrismaDocumentRepository } from '../repositories/prisma/prisma-document-repository';
 import { MessageRepository } from '../repositories/message-repository';
 import { PrismaMessageRepository } from '../repositories/prisma/prisma-message-repository';
+import { ChatRepository } from '@/repositories/chat-repository';
+import { PrismaChatRepository } from '@/repositories/prisma/prisma-chat-repository';
 
 @Module({
   imports: [
@@ -21,6 +23,9 @@ import { PrismaMessageRepository } from '../repositories/prisma/prisma-message-r
   }, {
     provide: MessageRepository,
     useClass: PrismaMessageRepository,
+  }, {
+    provide: ChatRepository,
+    useClass: PrismaChatRepository,
   }],
 })
 export class UploadModule {}

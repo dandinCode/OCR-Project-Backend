@@ -1,10 +1,14 @@
 import { ChatRepository } from "@/repositories/chat-repository";
-import { Body, Controller, Get, Param, Post, Put } from "@nestjs/common";
+import { DocumentRepository } from "@/repositories/document-repository";
+import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import fs from 'fs';
+import path from 'path';
 
 @Controller('chat')
 export class ChatController{
     constructor(
-            private chatRepository: ChatRepository
+            private chatRepository: ChatRepository,
+            private documentRepository: DocumentRepository
         ) {}
 
     @Post()
@@ -48,6 +52,19 @@ export class ChatController{
             const {chatId, name} = body;
 
             await this.chatRepository.updateName(chatId, name);
+
+            return { success: true };
+        } catch(error){
+            return { success: false, error: error.message };
+        }
+    }
+
+    @Delete("/delete")
+    async delete(@Body() body: {chatId: string }){
+        try{
+            const {chatId} = body;
+
+            await this.chatRepository.delete(chatId);
 
             return { success: true };
         } catch(error){

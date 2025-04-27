@@ -5,7 +5,6 @@ import { DocumentRepository } from '../repositories/document-repository';
 const PDFDocument = require('pdfkit');
 import { Response } from 'express';
 import { MessageRepository } from '../repositories/message-repository';
-import { randomUUID } from 'node:crypto';
 import { ChatRepository } from '@/repositories/chat-repository';
 const fs = require('fs');
 

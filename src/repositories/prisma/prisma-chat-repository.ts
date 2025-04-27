@@ -28,13 +28,11 @@ export class PrismaChatRepository implements ChatRepository {
         });
       }
 
-      async updateName(id: string, name: string): Promise<{} | null> {
-          const chat = await this.prisma.chat.update({
+      async updateName(id: string, name: string): Promise<void> {
+          await this.prisma.chat.update({
               where: { id }, 
-              data: { name, accessed: new Date() },  
-              select: { id: true },  
+              data: { name, accessed: new Date() }
             });
-          return chat;
       }
 
       async findAllByUserId(userId: string): Promise<
@@ -45,11 +43,24 @@ export class PrismaChatRepository implements ChatRepository {
         });
       }
 
-      async updateAccessed(id: string): Promise<{} | null> {
-        return this.prisma.chat.update({
+      async updateAccessed(id: string): Promise<void> {
+        await this.prisma.chat.update({
           where: { id },
           data: { accessed: new Date() },
-          select: { id: true },
+        });
+      }
+
+      async delete(id: string): Promise<void> {
+        await this.prisma.message.deleteMany({
+          where: { chatId: id },
+        });
+      
+        await this.prisma.document.deleteMany({
+          where: { chatId: id },
+        });
+      
+        await this.prisma.chat.delete({
+          where: { id },
         });
       }
 

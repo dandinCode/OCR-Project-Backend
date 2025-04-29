@@ -41,7 +41,7 @@ export class AppController {
           return { success: false, error: "User not found" };
       }
 
-      return user;
+      return {success: true, user};
       } catch (error) {
           console.error('Error fetching user:', error);
           return { success: false, error: error.message };

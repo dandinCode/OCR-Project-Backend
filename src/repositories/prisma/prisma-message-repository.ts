@@ -6,11 +6,11 @@ import { MessageRepository } from "../message-repository";
 export class PrismaMessageRepository implements MessageRepository {
     constructor(private prisma: PrismaService) {}
 
-    async create(userId: string, documentId: string, text: string, owner: string): Promise<{ id: string }> {
+    async create(userId: string, chatId: string, text: string, owner: string): Promise<{ id: string }> {
         const message = await this.prisma.message.create({
           data: {
             userId,
-            documentId,
+            chatId,
             text,
             owner,
           },
@@ -22,11 +22,11 @@ export class PrismaMessageRepository implements MessageRepository {
         return message;
   }
 
-  async findAllByDocumentId(documentId: string): Promise<
+  async findAllByChatId(chatId: string): Promise<
       { id: string; text: string; owner: string }[]
     > {
       return this.prisma.message.findMany({
-        where: { documentId },
+        where: { chatId },
       });
     }
 }

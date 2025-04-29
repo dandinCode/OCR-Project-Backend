@@ -29,12 +29,13 @@ model Document {
   extractedText String?
   createdAt     DateTime @default(now())
   name          String?
+  chatId        String
 }
 
 model Message {
   id          String   @id @default(cuid())
   userId      String
-  documentId  String
+  chatId      String
   text        String
   owner       String
   createdAt   DateTime @default(now())
@@ -47,4 +48,12 @@ model Plans {
   price         Decimal
   themeColor    String?
   paymentLinks  String?
+}
+
+model Chat{ 
+  id          String   @id @default(cuid())
+  name        String   
+  createdAt   DateTime @default(now())
+  userId      String
+  accessed    DateTime @default(now())
 }

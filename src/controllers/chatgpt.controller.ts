@@ -2,25 +2,40 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { OpenAIService } from '../services/chatgpt.service';
 import { MessageRepository } from '../repositories/message-repository';
 import { UserRepository } from '../repositories/user-repository';
+import { DocumentRepository } from '@/repositories/document-repository';
+import { ChatRepository } from '@/repositories/chat-repository';
 
 
 @Controller('openai')
 export class OpenAIController {
-  constructor(private readonly openAIService: OpenAIService, private messageRepository: MessageRepository,  private userRepository: UserRepository) {}
+  constructor(
+    private readonly openAIService: OpenAIService, 
+    private messageRepository: MessageRepository,  
+    private userRepository: UserRepository,  
+    private documentRepository: DocumentRepository,
+    private chatRepository: ChatRepository
+  ) {}
  
   @Post('chat')
-  async chat(@Body() body: { prompt: string, document: Document }) {
+  async chat(@Body() body: { prompt: string, userId: string, chatId: string }) {
     try{
-      const { prompt, document } = body;
+      const { prompt, userId, chatId } = body;
 
-      const user = await this.userRepository.findById(document.userId);
+      const user = await this.userRepository.findById(userId);
 
-      const { response, totalTokensUsed } = await this.openAIService.generateText(prompt, document.extractedText, user.maxTokens<5000?user.maxTokens:5000);
+      await this.chatRepository.updateAccessed(chatId, )
 
-      await this.userRepository.updateMaxTokens(document.userId, (user.maxTokens - totalTokensUsed));
+      const documents = await this.documentRepository.findAllByChatId(chatId);
+      const concatenatedText = documents
+        .map(doc => `imagem ${doc.name || doc.filePath.split("\\").pop()}: ${doc.extractedText}`)
+        .join(", ");
+
+      const { response, totalTokensUsed } = await this.openAIService.generateText(prompt, concatenatedText, user.maxTokens<5000?user.maxTokens:5000);
+
+      await this.userRepository.updateMaxTokens(userId, (user.maxTokens - totalTokensUsed));
   
-      await this.messageRepository.create(document.userId, document.id, prompt, "user");
-      await this.messageRepository.create(document.userId, document.id, response, "chatgpt");
+      await this.messageRepository.create(userId, chatId, prompt, "user");
+      await this.messageRepository.create(userId, chatId, response, "chatgpt");
     } catch (error) {
         console.error('Error fetching document:', error);
         return { success: false, error: error.message };
@@ -39,25 +54,17 @@ export class OpenAIController {
     
   }
 
-  @Get('messages/:documentId')
-  async listMessages(@Param('documentId') documentId: string) {
+  @Get('messages/:chatId')
+  async listMessages(@Param('chatId') chatId: string) {
     try{
-      if (!documentId) {
+      if (!chatId) {
         return { error: 'User ID is required' };
       }
-      const messages = await this.messageRepository.findAllByDocumentId(documentId);
+      const messages = await this.messageRepository.findAllByChatId(chatId);
       return messages;
     } catch (error) {
       console.error('Error fetching document:', error);
       return { success: false, error: error.message };
     }
   }
-}
-
-interface Document {
-  id: string;
-  userId: string;
-  filePath: string;
-  extractedText: string;
-  name: string;
 }

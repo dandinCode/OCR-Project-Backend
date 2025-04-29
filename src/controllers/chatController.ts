@@ -67,7 +67,6 @@ export class ChatController{
             const documents = await this.documentRepository.findAllByChatId(chatId);
 
             for (const document of documents) {
-                console.log(document.filePath)
                 if (fs.existsSync(document.filePath)) {
                     fs.unlinkSync(document.filePath); 
                 } 

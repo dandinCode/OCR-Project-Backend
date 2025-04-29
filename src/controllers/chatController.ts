@@ -1,8 +1,8 @@
 import { ChatRepository } from "@/repositories/chat-repository";
 import { DocumentRepository } from "@/repositories/document-repository";
 import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+
 
 @Controller('chat')
 export class ChatController{
@@ -63,6 +63,15 @@ export class ChatController{
     async delete(@Body() body: {chatId: string }){
         try{
             const {chatId} = body;
+
+            const documents = await this.documentRepository.findAllByChatId(chatId);
+
+            for (const document of documents) {
+                console.log(document.filePath)
+                if (fs.existsSync(document.filePath)) {
+                    fs.unlinkSync(document.filePath); 
+                } 
+            }
 
             await this.chatRepository.delete(chatId);
 

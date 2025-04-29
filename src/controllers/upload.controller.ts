@@ -126,8 +126,8 @@ export class UploadController {
             pdf.fontSize(16).text(`Imagem: ${document.name || 'Sem nome'}`);
 
             if (fs.existsSync(document.filePath)) {
-            pdf.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
-            pdf.moveDown(15);
+                pdf.image(document.filePath, { fit: [250, 300], align: 'center', valign: 'center' });
+                pdf.moveDown(15);
             }
 
             pdf.fontSize(14).text("Dados extraído:", { underline: true });
